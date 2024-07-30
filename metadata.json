@@ -1,0 +1,8 @@
+{
+  "name": "Marble Planet ADV Token",
+  "symbol": "MPADV",
+  "uri": "https://example.com/path/to/metadata.json",
+  "seller_fee_basis_points": 0,
+  "image": "https://example.com/path/to/icon.png",
+  "description": "This is an example token description"
+}
