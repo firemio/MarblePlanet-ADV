@@ -13,16 +13,14 @@ npm init -y
 
 
 ```
-npm install @solana/web3.js @metaplex/js ts-node typescript
+npm install \
+  @metaplex-foundation/umi \
+  @metaplex-foundation/umi-bundle-defaults \
+  @solana/web3.js \
+  @metaplex-foundation/mpl-token-metadata
 ```
 
-
 ```
-npx tsc --init
-```
-
-
-```
-ts-node set_metadata_for_spl_token.ts
+node set_metadata_for_spl_token.js
 ```
 
