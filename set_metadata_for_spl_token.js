@@ -1,14 +1,8 @@
-import {
-  Connection,
-  PublicKey,
-  Keypair,
-  Transaction,
-  sendAndConfirmTransaction,
-} from '@solana/web3.js';
+import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
   createCreateMetadataAccountV3Instruction,
   createUpdateMetadataAccountV2Instruction,
-  PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID,
+  PROGRAM_ID,
 } from '@metaplex-foundation/mpl-token-metadata';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
@@ -17,8 +11,8 @@ async function setOrUpdateMetadata(mintAddress, payer, name, symbol, uri) {
   const mintPublicKey = new PublicKey(mintAddress);
   
   const [metadataAccount] = PublicKey.findProgramAddressSync(
-    [Buffer.from('metadata'), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mintPublicKey.toBuffer()],
-    TOKEN_METADATA_PROGRAM_ID
+    [Buffer.from('metadata'), PROGRAM_ID.toBuffer(), mintPublicKey.toBuffer()],
+    PROGRAM_ID
   );
 
   // メタデータアカウントの存在確認
@@ -70,7 +64,7 @@ async function setOrUpdateMetadata(mintAddress, payer, name, symbol, uri) {
             uses: null,
           },
           updateAuthority: payer.publicKey,
-          primarySaleHappened: false,
+          primarySaleHappened: null,
           isMutable: true,
         },
       }
@@ -86,18 +80,9 @@ async function setOrUpdateMetadata(mintAddress, payer, name, symbol, uri) {
   }
 }
 
-(async () => {
+async function main() {
   try {
     const mintAddress = 'YOUR_MINT_ADDRESS_HERE';
     const payer = Keypair.fromSecretKey(new Uint8Array(JSON.parse('YOUR_SECRET_KEY_HERE')));
     const name = "Your Token Name";
-    const symbol = "TOKEN";
-    
-    // メタデータJSONのURLを指定（事前にIPFSなどにアップロード済みであること）
-    const uri = "https://your-metadata-url.com/metadata.json";
-
-    await setOrUpdateMetadata(mintAddress, payer, name, symbol, uri);
-  } catch (error) {
-    console.error('Error in main execution:', error);
-  }
-})();
+    const symbol
