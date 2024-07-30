@@ -7,8 +7,8 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use mpl_token_metadata::{
-    instruction::create_metadata_accounts_v3,
-    state::{Creator, DataV2},
+    instructions::CreateMetadataAccountV3,
+    types::{DataV2, Creator},
 };
 use std::str::FromStr;
 
@@ -53,25 +53,18 @@ fn main() -> Result<()> {
         uses: None,
     };
 
-    let create_metadata_ix = create_metadata_accounts_v3(
-        mpl_token_metadata::ID,
-        metadata_pubkey,
-        mint_pubkey,
-        payer.pubkey(),
-        payer.pubkey(),
-        payer.pubkey(),
-        payer.pubkey(),
-        data.name,
-        data.symbol,
-        data.uri,
-        data.creators,
-        data.seller_fee_basis_points,
-        true,
-        true,
-        data.collection,
-        data.uses,
-        None,
-    );
+    let create_metadata_ix = CreateMetadataAccountV3 {
+        metadata: metadata_pubkey,
+        mint: mint_pubkey,
+        mint_authority: payer.pubkey(),
+        payer: payer.pubkey(),
+        update_authority: payer.pubkey(),
+        system_program: solana_program::system_program::id(),
+        rent: solana_program::sysvar::rent::id(),
+        data,
+        is_mutable: true,
+        collection_details: None,
+    }.instruction();
 
     // トランザクションの作成と送信
     let recent_blockhash = connection.get_latest_blockhash()?;
