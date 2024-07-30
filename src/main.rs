@@ -10,6 +10,7 @@ use mpl_token_metadata::{
     instructions::CreateMetadataAccountV3,
     types::{DataV2, Creator},
 };
+use solana_program::system_program;
 use std::str::FromStr;
 
 fn main() -> Result<()> {
@@ -18,12 +19,12 @@ fn main() -> Result<()> {
     let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
 
     // ダミーの秘密鍵を使用してKeypairを生成
-    let secret_key = vec![
-        11, 22, 33, 44, 55, 66, 77, 88, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
-        111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128,
-        129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146,
-        147, 148, 149, 150, 151, 152, 153, 154, 155, 156,
-    ]; // 64バイトの秘密鍵
+    let secret_key: [u8; 64] = [
+        11, 22, 33, 44, 55, 66, 77, 88, 99, 100, 101, 102, 103, 104, 105, 106,
+        107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122,
+        123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138,
+        139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154,
+    ];
     let payer = Keypair::from_bytes(&secret_key)?;
 
     // 既存のトークンのミントアドレスを指定（実際のアドレスに置き換えてください）
@@ -42,11 +43,11 @@ fn main() -> Result<()> {
     let data = DataV2 {
         name: "My Example Token".to_string(),
         symbol: "MET".to_string(),
-        uri: "https://example.com/my_token_metadata.json".to_string(), // 有効なメタデータURIに置き換え
+        uri: "https://example.com/my_token_metadata.json".to_string(),
         seller_fee_basis_points: 0,
         creators: Some(vec![Creator {
             address: payer.pubkey(),
-            verified: true,
+            verified: false,
             share: 100,
         }]),
         collection: None,
@@ -59,8 +60,7 @@ fn main() -> Result<()> {
         mint_authority: payer.pubkey(),
         payer: payer.pubkey(),
         update_authority: payer.pubkey(),
-        system_program: solana_program::system_program::id(),
-        rent: solana_program::sysvar::rent::id(),
+        system_program: system_program::id(),
         data,
         is_mutable: true,
         collection_details: None,
