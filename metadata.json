@@ -1,8 +1,8 @@
 {
   "name": "Marble Planet ADV Token",
   "symbol": "MPADV",
-  "uri": "https://example.com/path/to/metadata.json",
+  "uri": "https://raw.githubusercontent.com/firemio/MarblePlanet-ADV/main/metadata.json",
   "seller_fee_basis_points": 0,
-  "image": "https://example.com/path/to/icon.png",
-  "description": "This is an example token description"
+  "image": "https://raw.githubusercontent.com/firemio/MarblePlanet-ADV/main/marbleplanet-adv.png",
+  "description": "Marble Planet Advisor Token"
 }
