@@ -1,5 +1,5 @@
 [dependencies]
-solana-program
-solana-client
-solana-sdk
-mpl-token-metadata
+solana-program = "2.0.3"
+solana-client = "2.0.3"
+solana-sdk = "2.0.3"
+mpl-token-metadata = "4.1.2"
