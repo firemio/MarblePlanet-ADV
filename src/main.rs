@@ -1,3 +1,4 @@
+use anyhow::Result;
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::{
     commitment_config::CommitmentConfig,
@@ -5,65 +6,60 @@ use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
 };
-use mpl_token_metadata::{
-    instruction::create_metadata_accounts_v2,
-    state::Data,
-};
-use std::str::FromStr;
+use mpl_token_metadata::instruction as metadata_instruction;
 
-fn main() {
-    let client = RpcClient::new_with_commitment(
-        "https://api.devnet.solana.com".to_string(),
-        CommitmentConfig::confirmed(),
+fn main() -> Result<()> {
+    // Solana Mainnet Beta クライアントの初期化
+    let rpc_url = "https://api.mainnet-beta.solana.com".to_string();
+    let connection = RpcClient::new_with_commitment(rpc_url, CommitmentConfig::confirmed());
+
+    // トークン作成者のキーペア（実際の使用時は安全に管理してください）
+    let payer = Keypair::from_base58_string("あなたの秘密鍵をここに入力"); // 秘密鍵を適切に設定
+
+    // 既存のトークンのミントアドレスを指定（実際のアドレスに置き換えてください）
+    let mint_pubkey = Pubkey::from_str("あなたのトークンミントアドレスをここに入力")?; // 例: "TokenMintAddress"
+
+    // メタデータアカウントのアドレスを導出
+    let metadata_seeds = &[
+        "metadata".as_bytes(),
+        mpl_token_metadata::ID.as_ref(),
+        mint_pubkey.as_ref(),
+    ];
+    let (metadata_pubkey, _) = Pubkey::find_program_address(metadata_seeds, &mpl_token_metadata::ID);
+    println!("Metadata Account Address: {}", metadata_pubkey);
+
+    // メタデータの作成
+    let create_metadata_ix = metadata_instruction::create_metadata_accounts_v3(
+        mpl_token_metadata::ID,
+        metadata_pubkey,
+        mint_pubkey,
+        payer.pubkey(),
+        payer.pubkey(),
+        payer.pubkey(),
+        "My Example Token".to_string(),
+        "MET".to_string(),
+        "https://example.com/my_token_metadata.json".to_string(), // 有効なメタデータURIに置き換え
+        None,
+        0,
+        true,
+        true,
+        None,
+        None,
+        None,
     );
 
-    let payer = Keypair::from_base58_string("YOUR_BASE58_PRIVATE_KEY");
-    let mint_pubkey = Pubkey::from_str("YOUR_TOKEN_MINT_ADDRESS").unwrap();
+    // トランザクションの作成と送信
+    let recent_blockhash = connection.get_latest_blockhash()?;
+    let transaction = Transaction::new_signed_with_payer(
+        &[create_metadata_ix],
+        Some(&payer.pubkey()),
+        &[&payer],
+        recent_blockhash,
+    );
 
-    let metadata_seeds = &[
-        b"metadata",
-        &mpl_token_metadata::id().to_bytes(),
-        &mint_pubkey.to_bytes(),
-    ];
-    let (metadata_pubkey, _) = Pubkey::find_program_address(metadata_seeds, &mpl_token_metadata::id());
-
-    let metadata_data = Data {
-        name: "Example Token".to_string(),
-        symbol: "EXMPL".to_string(),
-        uri: "https://example.com/path/to/metadata.json".to_string(),
-        seller_fee_basis_points: 0,
-        creators: None,
-    };
-
-    let instructions = vec![
-        solana_sdk::system_instruction::create_account(
-            &payer.pubkey(),
-            &metadata_pubkey,
-            client.get_minimum_balance_for_rent_exemption(mpl_token_metadata::state::MAX_METADATA_LEN).unwrap(),
-            mpl_token_metadata::state::MAX_METADATA_LEN as u64,
-            &mpl_token_metadata::id(),
-        ),
-        create_metadata_accounts_v2(
-            mpl_token_metadata::id(),
-            metadata_pubkey,
-            mint_pubkey,
-            payer.pubkey(),
-            payer.pubkey(),
-            payer.pubkey(),
-            metadata_data.name,
-            metadata_data.symbol,
-            metadata_data.uri,
-            None,
-            0,
-            true,
-            true,
-        ),
-    ];
-
-    let mut transaction = Transaction::new_with_payer(&instructions, Some(&payer.pubkey()));
-    let recent_blockhash = client.get_recent_blockhash().unwrap().0;
-    transaction.sign(&[&payer], recent_blockhash);
-
-    let signature = client.send_and_confirm_transaction(&transaction).unwrap();
+    // トランザクションの送信
+    let signature = connection.send_and_confirm_transaction(&transaction)?;
     println!("Transaction signature: {}", signature);
+
+    Ok(())
 }
