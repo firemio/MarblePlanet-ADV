@@ -1,0 +1,5 @@
+[dependencies]
+solana-program
+solana-client
+solana-sdk
+mpl-token-metadata
