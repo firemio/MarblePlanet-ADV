@@ -1,4 +1,10 @@
-import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import {
+  Connection,
+  PublicKey,
+  Keypair,
+  Transaction,
+  sendAndConfirmTransaction,
+} from '@solana/web3.js';
 import {
   createCreateMetadataAccountV3Instruction,
   createUpdateMetadataAccountV2Instruction,
@@ -80,7 +86,7 @@ async function setOrUpdateMetadata(mintAddress, payer, name, symbol, uri) {
   }
 }
 
-async function main() {
+(async () => {
   try {
     const mintAddress = 'YOUR_MINT_ADDRESS_HERE';
     const payer = Keypair.fromSecretKey(new Uint8Array(JSON.parse('YOUR_SECRET_KEY_HERE')));
@@ -94,6 +100,4 @@ async function main() {
   } catch (error) {
     console.error('Error in main execution:', error);
   }
-}
-
-main();
+})();
