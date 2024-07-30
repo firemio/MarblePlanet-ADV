@@ -22,5 +22,7 @@ npx tsc --init
 ```
 
 
-
+```
+ts-node set_metadata_for_spl_token.ts
+```
 
